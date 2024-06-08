@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
 	"sync"
@@ -53,7 +53,7 @@ func getNumbersFromAPI(url string) ([]int, error) {
 	if err != nil {
 		return nil, err
 	}
-	req.Header.Add("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiZXhwIjoxNzE3ODI4MTc1LCJpYXQiOjE3MTc4Mjc4NzUsImlzcyI6IkFmZm9yZG1lZCIsImp0aSI6ImJlMDMyMTQ1LWJkNDQtNDRiNS1iYmI1LWNjNDA1ODhlNmE1MCIsInN1YiI6IjIxMzExQTY2MDJAc3JlZW5pZGhpLmVkdS5pbiJ9LCJjb21wYW55TmFtZSI6IklNNDUxNDVWIiwiY2xpZW50SUQiOiJiZTAzMjE0NS1iZDQ0LTQ0YjUtYmJiNS1jYzQwNTg4ZTZhNTAiLCJjbGllbnRTZWNyZXQiOiJXclJPS3BrdUNjYldYa0ZIIiwib3duZXJOYW1lIjoiQXNoaXNoIE1hbGxhIiwib3duZXJFbWFpbCI6IjIxMzExQTY2MDJAc3JlZW5pZGhpLmVkdS5pbiIsInJvbGxObyI6IjIxMzExQTY2MDIifQ.BtwA7U57AacM-orNU3h79ZpSrTWmxGrI_w1ejRnFvq4")
+	req.Header.Add("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJNYXBDbGFpbXMiOnsiZXhwIjoxNzE3ODI0NTcxLCJpYXQiOjE3MTc4MjQyNzEsImlzcyI6IkFmZm9yZG1lZCIsImp0aSI6ImJlMDMyMTQ1LWJkNDQtNDRiNS1iYmI1LWNjNDA1ODhlNmE1MCIsInN1YiI6IjIxMzExQTY2MDJAc3JlZW5pZGhpLmVkdS5pbiJ9LCJjb21wYW55TmFtZSI6IklNNDUxNDVWIiwiY2xpZW50SUQiOiJiZTAzMjE0NS1iZDQ0LTQ0YjUtYmJiNS1jYzQwNTg4ZTZhNTAiLCJjbGllbnRTZWNyZXQiOiJXclJPS3BrdUNjYldYa0ZIIiwib3duZXJOYW1lIjoiQXNoaXNoIE1hbGxhIiwib3duZXJFbWFpbCI6IjIxMzExQTY2MDJAc3JlZW5pZGhpLmVkdS5pbiIsInJvbGxObyI6IjIxMzExQTY2MDIifQ.Ayc8IkmA6hRHUjNLRj4BY9GbuObuyMl4FLShD2UCUqM")
 
 	res, err := client.Do(req)
 	if err != nil {
@@ -61,11 +61,13 @@ func getNumbersFromAPI(url string) ([]int, error) {
 	}
 	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("API request failed with status code %d", res.StatusCode)
+	body, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	var numbersResponse NumbersResponse
+	err = json.Unmarshal(body, &numbersResponse)
 	if err != nil {
 		return nil, err
 	}
